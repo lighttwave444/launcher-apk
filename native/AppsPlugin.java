@@ -106,6 +106,8 @@ public class AppsPlugin extends Plugin {
         call.resolve();
     }
 
+    private static int cascade = 0;
+
     @PluginMethod
     public void launchWindow(PluginCall call) {
         String pkg = call.getString("pkg");
@@ -116,8 +118,9 @@ public class AppsPlugin extends Plugin {
         android.util.DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
         int w = dm.widthPixels * 85 / 100;
         int h = dm.heightPixels * 60 / 100;
-        int x = (dm.widthPixels - w) / 2;
-        int y = dm.heightPixels * 12 / 100;
+        int step = cascade++ % 5;
+        int x = dm.widthPixels * 3 / 100 * step;
+        int y = dm.heightPixels * (8 + 4 * step) / 100;
         android.app.ActivityOptions o = android.app.ActivityOptions.makeBasic();
         o.setLaunchBounds(new android.graphics.Rect(x, y, x + w, y + h));
         try {
