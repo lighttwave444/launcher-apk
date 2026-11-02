@@ -57,6 +57,10 @@ if (!m.includes('ShizukuProvider')) {
   m = m.replace('</application>', '    <provider android:name="rikka.shizuku.ShizukuProvider" android:authorities="' + appId + '.shizuku" android:multiprocess="false" android:enabled="true" android:exported="true" android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />\n</application>');
   m = m.replace('<application', '<uses-permission android:name="moe.shizuku.manager.permission.API_V23" />\n    <application');
 }
+const vp = path.join(root, 'android/variables.gradle');
+if (fs.existsSync(vp)) {
+  fs.writeFileSync(vp, fs.readFileSync(vp, 'utf8').replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 23'));
+}
 const gp = path.join(root, 'android/app/build.gradle');
 let g = fs.readFileSync(gp, 'utf8');
 if (!g.includes('shizuku')) {
