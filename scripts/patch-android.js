@@ -53,5 +53,15 @@ if (!m.includes('PointerService')) {
     '    </service>\n';
   m = m.replace('</application>', svc + '</application>');
 }
+if (!m.includes('ShizukuProvider')) {
+  m = m.replace('</application>', '    <provider android:name="rikka.shizuku.ShizukuProvider" android:authorities="' + appId + '.shizuku" android:multiprocess="false" android:enabled="true" android:exported="true" android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />\n</application>');
+  m = m.replace('<application', '<uses-permission android:name="moe.shizuku.manager.permission.API_V23" />\n    <application');
+}
+const gp = path.join(root, 'android/app/build.gradle');
+let g = fs.readFileSync(gp, 'utf8');
+if (!g.includes('shizuku')) {
+  g = g.replace(/dependencies\s*\{/, "dependencies {\n    implementation 'dev.rikka.shizuku:api:13.1.5'\n    implementation 'dev.rikka.shizuku:provider:13.1.5'");
+  fs.writeFileSync(gp, g);
+}
 fs.writeFileSync(manifestPath, m);
 console.log('Launcher configurado: ' + appId);

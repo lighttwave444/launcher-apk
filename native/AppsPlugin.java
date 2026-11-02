@@ -161,6 +161,35 @@ public class AppsPlugin extends Plugin {
         call.resolve(r);
     }
 
+    @PluginMethod
+    public void sh(final PluginCall call) {
+        final String cmd = call.getString("cmd", "id");
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    if (!rikka.shizuku.Shizuku.pingBinder()) { call.reject("Shizuku desligado"); return; }
+                    if (rikka.shizuku.Shizuku.checkSelfPermission() != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        rikka.shizuku.Shizuku.requestPermission(1);
+                        call.reject("Permita o launcher no Shizuku e toque de novo");
+                        return;
+                    }
+                    java.lang.reflect.Method m = rikka.shizuku.Shizuku.class.getDeclaredMethod("newProcess", String[].class, String[].class, String.class);
+                    m.setAccessible(true);
+                    Process pr = (Process) m.invoke(null, new String[]{"sh", "-c", cmd + " 2>&1"}, null, null);
+                    java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(pr.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String ln;
+                    while ((ln = br.readLine()) != null && sb.length() < 3000) sb.append(ln).append("\n");
+                    com.getcapacitor.JSObject r = new com.getcapacitor.JSObject();
+                    r.put("out", sb.toString());
+                    call.resolve(r);
+                } catch (Throwable t) {
+                    call.reject("Erro: " + t);
+                }
+            }
+        }).start();
+    }
+
     private static int cascade = 0;
 
     @PluginMethod
