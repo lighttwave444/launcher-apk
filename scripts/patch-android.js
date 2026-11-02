@@ -59,7 +59,7 @@ if (!m.includes('ShizukuProvider')) {
 }
 const vp = path.join(root, 'android/variables.gradle');
 if (fs.existsSync(vp)) {
-  fs.writeFileSync(vp, fs.readFileSync(vp, 'utf8').replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 23'));
+  fs.writeFileSync(vp, fs.readFileSync(vp, 'utf8').replace(/minSdkVersion\s*=\s*\d+/, 'minSdkVersion = 24'));
 }
 const gp = path.join(root, 'android/app/build.gradle');
 let g = fs.readFileSync(gp, 'utf8');
