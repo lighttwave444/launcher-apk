@@ -730,5 +730,15 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(
 <script>try{(function(){const mk=(t,b,f)=>{const x=document.createElement('button');x.textContent=t;x.style.cssText='position:fixed;right:8px;bottom:'+b+'px;z-index:99999;padding:8px 10px;border-radius:12px;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:12px';x.onclick=f;document.body.appendChild(x)};mk('A11y',140,()=>NA.a11ySettings().catch(()=>{}));mk('Teste toque',96,()=>{toast('Toque no centro em 3s');setTimeout(()=>NA.tapTest().then(r=>toast(r.ok?'Toque enviado':'Servico desligado')).catch(()=>toast('Erro')),3000)})})()}catch(e){}</script>
 <script>try{(function(){const x=document.createElement('button');x.textContent='Mouse';x.style.cssText='position:fixed;right:8px;bottom:184px;z-index:99999;padding:8px 10px;border-radius:12px;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:12px';x.onclick=()=>NA.padToggle().then(r=>{if(!r.ok)toast('Ligue o servico em A11y')}).catch(()=>toast('Erro'));document.body.appendChild(x)})()}catch(e){}</script>
 <script>try{(function(){const x=document.createElement('button');x.textContent='Shizuku';x.style.cssText='position:fixed;right:8px;bottom:228px;z-index:99999;padding:8px 10px;border-radius:12px;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:12px';x.onclick=()=>NA.sh({cmd:'dumpsys activity activities | grep -E "mBounds|Task" | head -20'}).then(r=>alert(r.out||'vazio')).catch(e=>alert(e.message||e));document.body.appendChild(x)})()}catch(e){}</script>
-</body>
+<script id="dbg">
+(function(){
+var d=document.createElement('div');
+d.style.cssText='position:fixed;top:0;left:0;z-index:2147483647;background:#000c;color:#0f0;font:12px monospace;padding:4px;pointer-events:none;white-space:pre';
+document.body.appendChild(d);
+function show(e){
+d.textContent='evento: '+Math.round(e.clientX)+', '+Math.round(e.clientY)+'\njanela: '+innerWidth+'x'+innerHeight+'\ndpr: '+devicePixelRatio+'\nscreen: '+screen.width+'x'+screen.height;
+}
+['pointermove','pointerdown','mousemove','mousedown'].forEach(function(t){addEventListener(t,show,true)});
+})();
+</script></body>
 </html>
