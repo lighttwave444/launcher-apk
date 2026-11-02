@@ -153,6 +153,14 @@ public class AppsPlugin extends Plugin {
         call.resolve();
     }
 
+    @PluginMethod
+    public void padToggle(PluginCall call) {
+        boolean ok = PointerService.togglePad();
+        com.getcapacitor.JSObject r = new com.getcapacitor.JSObject();
+        r.put("ok", ok);
+        call.resolve(r);
+    }
+
     private static int cascade = 0;
 
     @PluginMethod
