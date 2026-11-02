@@ -24,6 +24,9 @@ for (const f of ['AppsPlugin.java', 'MainActivity.java', 'PointerService.java'])
 // 1b) config do servico de acessibilidade
 const xmlDir = path.join(root, 'android/app/src/main/res/xml');
 fs.mkdirSync(xmlDir, { recursive: true });
+const valDir = path.join(root, 'android/app/src/main/res/values');
+fs.mkdirSync(valDir, { recursive: true });
+fs.copyFileSync(path.join(root, 'native/res/pointer_strings.xml'), path.join(valDir, 'pointer_strings.xml'));
 fs.copyFileSync(path.join(root, 'native/res/xml/pointer_service_config.xml'), path.join(xmlDir, 'pointer_service_config.xml'));
 
 // 2) Manifest: HOME + DEFAULT na Activity principal e permissao para enxergar os apps

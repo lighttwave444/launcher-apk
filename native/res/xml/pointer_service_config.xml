@@ -3,4 +3,4 @@
     android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:canPerformGestures="true"
-    android:description="Permite que o ponteiro do launcher toque e arraste nas janelas dos outros apps." />
+    android:description="@string/pointer_service_desc" />
