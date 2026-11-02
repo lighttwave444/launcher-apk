@@ -136,6 +136,23 @@ public class AppsPlugin extends Plugin {
         });
     }
 
+    @PluginMethod
+    public void tapTest(PluginCall call) {
+        android.util.DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
+        boolean ok = PointerService.tap(dm.widthPixels / 2f, dm.heightPixels / 2f);
+        com.getcapacitor.JSObject r = new com.getcapacitor.JSObject();
+        r.put("ok", ok);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void a11ySettings(PluginCall call) {
+        Intent i = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(i);
+        call.resolve();
+    }
+
     private static int cascade = 0;
 
     @PluginMethod

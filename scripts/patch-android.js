@@ -15,11 +15,16 @@ if (!fs.existsSync(manifestPath)) {
 
 // 1) Java: plugin + MainActivity (com o package certo)
 fs.mkdirSync(javaDir, { recursive: true });
-for (const f of ['AppsPlugin.java', 'MainActivity.java']) {
+for (const f of ['AppsPlugin.java', 'MainActivity.java', 'PointerService.java']) {
   const src = fs.readFileSync(path.join(root, 'native', f), 'utf8')
     .replace(/^package\s+[\w.]+;/m, 'package ' + appId + ';');
   fs.writeFileSync(path.join(javaDir, f), src);
 }
+
+// 1b) config do servico de acessibilidade
+const xmlDir = path.join(root, 'android/app/src/main/res/xml');
+fs.mkdirSync(xmlDir, { recursive: true });
+fs.copyFileSync(path.join(root, 'native/res/xml/pointer_service_config.xml'), path.join(xmlDir, 'pointer_service_config.xml'));
 
 // 2) Manifest: HOME + DEFAULT na Activity principal e permissao para enxergar os apps
 let m = fs.readFileSync(manifestPath, 'utf8');
@@ -37,6 +42,13 @@ if (!m.includes('<queries>')) {
 }
 if (!/android:launchMode="singleTask"/.test(m)) {
   m = m.replace(/(<activity\b)/, '$1\n            android:launchMode="singleTask"');
+}
+if (!m.includes('PointerService')) {
+  const svc = '    <service android:name="' + appId + '.PointerService" android:label="Launcher ponteiro" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">\n' +
+    '      <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>\n' +
+    '      <meta-data android:name="android.accessibilityservice" android:resource="@xml/pointer_service_config" />\n' +
+    '    </service>\n';
+  m = m.replace('</application>', svc + '</application>');
 }
 fs.writeFileSync(manifestPath, m);
 console.log('Launcher configurado: ' + appId);
