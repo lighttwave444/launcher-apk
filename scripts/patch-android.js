@@ -89,3 +89,13 @@ console.log('Launcher configurado: ' + appId);
     fs.writeFileSync(gp2, g);
   }
 }
+
+// hidden api bypass
+{
+  const gp3 = path.join(root, 'android/app/build.gradle');
+  let g3 = fs.readFileSync(gp3, 'utf8');
+  if (!g3.includes('hiddenapibypass')) {
+    g3 = g3.replace(/dependencies\s*\{/, "dependencies {\n    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'");
+    fs.writeFileSync(gp3, g3);
+  }
+}

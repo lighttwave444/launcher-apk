@@ -34,7 +34,7 @@ public class PointerService extends AccessibilityService {
         public void run() {
             dragging = true;
             sx = cx;
-            sy = cy;
+            sy = cy; ShizukuInput.down(cx, cy);
             if (cursor != null) cursor.setAlpha(0.5f);
         }
     };
@@ -94,7 +94,7 @@ public class PointerService extends AccessibilityService {
         cx = Math.max(0, Math.min(sw - 1, cx + dx));
         cy = Math.max(0, Math.min(sh - 1, cy + dy));
         cLp.x = (int) cx;
-        cLp.y = (int) cy;
+        cLp.y = (int) cy; ShizukuInput.move(cx, cy);
         wm.updateViewLayout(cursor, cLp);
     }
 
@@ -188,12 +188,12 @@ public class PointerService extends AccessibilityService {
                         break;
                     case MotionEvent.ACTION_UP:
                         h.removeCallbacks(longPress);
-                        if (dragging) swipe(sx, sy, cx, cy);
-                        else if (!moved) tap(cx, cy);
+                        if (dragging) { if (!ShizukuInput.up(cx, cy)) swipe(sx, sy, cx, cy); }
+                        else if (!moved) { if (!ShizukuInput.click(cx, cy)) tap(cx, cy); }
                         dragging = false;
                         cursor.setAlpha(1f);
                         break;
-                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_CANCEL: ShizukuInput.up(cx, cy);
                         h.removeCallbacks(longPress);
                         dragging = false;
                         cursor.setAlpha(1f);
