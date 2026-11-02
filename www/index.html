@@ -726,5 +726,6 @@ function drag(h,w,rs){
 }
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
+<script>try{document.addEventListener('focusin',e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))NA.setFocusable({on:true}).catch(()=>{})});document.addEventListener('focusout',e=>{if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))NA.setFocusable({on:false}).catch(()=>{})})}catch(e){}</script>
 </body>
 </html>

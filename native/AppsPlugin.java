@@ -124,6 +124,18 @@ public class AppsPlugin extends Plugin {
         }, 200);
     }
 
+    @PluginMethod
+    public void setFocusable(final PluginCall call) {
+        final boolean on = Boolean.TRUE.equals(call.getBoolean("on", false));
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                if (on) getActivity().getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                else getActivity().getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                call.resolve();
+            }
+        });
+    }
+
     private static int cascade = 0;
 
     @PluginMethod
