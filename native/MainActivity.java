@@ -23,4 +23,10 @@ public class MainActivity extends BridgeActivity {
             }
         });
     }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) AppsPlugin.bringOpenToFront(this);
+    }
 }

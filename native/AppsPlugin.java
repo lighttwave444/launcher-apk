@@ -106,6 +106,24 @@ public class AppsPlugin extends Plugin {
         call.resolve();
     }
 
+    private static final java.util.LinkedHashSet<String> OPEN = new java.util.LinkedHashSet<>();
+
+    static void bringOpenToFront(final android.content.Context ctx) {
+        if (OPEN.isEmpty()) return;
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            public void run() {
+                for (String p : new java.util.ArrayList<>(OPEN)) {
+                    try {
+                        Intent i = ctx.getPackageManager().getLaunchIntentForPackage(p);
+                        if (i == null) continue;
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        ctx.startActivity(i);
+                    } catch (Throwable t) { }
+                }
+            }
+        }, 200);
+    }
+
     private static int cascade = 0;
 
     @PluginMethod
@@ -126,6 +144,7 @@ public class AppsPlugin extends Plugin {
         try {
             o.getClass().getMethod("setLaunchWindowingMode", int.class).invoke(o, 5);
         } catch (Throwable t) { }
+        OPEN.add(pkg);
         getContext().startActivity(i, o.toBundle());
         call.resolve();
     }
