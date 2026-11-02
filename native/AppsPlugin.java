@@ -106,6 +106,27 @@ public class AppsPlugin extends Plugin {
         call.resolve();
     }
 
+    @PluginMethod
+    public void launchWindow(PluginCall call) {
+        String pkg = call.getString("pkg");
+        if (pkg == null) { call.reject("pkg ausente"); return; }
+        Intent i = getContext().getPackageManager().getLaunchIntentForPackage(pkg);
+        if (i == null) { call.reject("App nao encontrado"); return; }
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        android.util.DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
+        int w = dm.widthPixels * 85 / 100;
+        int h = dm.heightPixels * 60 / 100;
+        int x = (dm.widthPixels - w) / 2;
+        int y = dm.heightPixels * 12 / 100;
+        android.app.ActivityOptions o = android.app.ActivityOptions.makeBasic();
+        o.setLaunchBounds(new android.graphics.Rect(x, y, x + w, y + h));
+        try {
+            o.getClass().getMethod("setLaunchWindowingMode", int.class).invoke(o, 5);
+        } catch (Throwable t) { }
+        getContext().startActivity(i, o.toBundle());
+        call.resolve();
+    }
+
     private static String iconB64(Drawable d) {
         try {
             Bitmap bmp = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888);

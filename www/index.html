@@ -551,7 +551,7 @@ const CAP=window.Capacitor,NA=(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform()
 let appsSig='',appsTm=0;
 function aTile(a){const w=document.createElement('div');w.className='ai';const d=document.createElement('div');d.className='ic glass';
  const im=new Image();im.alt='';im.draggable=false;if(a.icon)im.src=a.icon;d.append(im);
- d.onclick=()=>{buzz();NA.launch({pkg:a.pkg}).catch(()=>toast('Não consegui abrir '+a.name))};
+ let lp=0,lt;d.addEventListener('pointerdown',()=>{lp=0;lt=setTimeout(()=>{lp=1;buzz();NA.launchWindow({pkg:a.pkg}).catch(()=>toast('Não consegui abrir em janela'))},500)});['pointerup','pointercancel','pointerleave'].forEach(e=>d.addEventListener(e,()=>clearTimeout(lt)));d.onclick=()=>{if(lp){lp=0;return}buzz();NA.launch({pkg:a.pkg}).catch(()=>toast('Não consegui abrir '+a.name))};
  const l=document.createElement('span');l.textContent=a.name;w.append(d,l);return w}
 async function loadApps(){
  if(!NA){allH.textContent='Todos os apps · a lista aparece só dentro do APK';return}
