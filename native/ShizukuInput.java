@@ -21,6 +21,7 @@ public class ShizukuInput {
     private static volatile boolean active;
 
     private static synchronized boolean init() {
+        if (true) return false;
         if (ok) return true;
         long now = SystemClock.uptimeMillis();
         if (lastTry != 0 && now - lastTry < 3000) return false;
