@@ -658,7 +658,10 @@ applyTheme();
 
 /* janelas */
 let z=10,n=0;
-function openApp(k){
+const PKG={msg:'com.whatsapp',cal:'com.google.android.calendar',cam:'com.zhiliaoapp.musically',mus:'com.google.android.apps.youtube.music',pho:'com.google.android.apps.photos',mail:'com.google.android.gm',map:'com.google.android.apps.maps',chr:'com.google.android.googlequicksearchbox',yt:'com.google.android.youtube',tg:'org.telegram.messenger',spo:'com.spotify.music'};
+async function nativeOpen(k){const L=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AppLauncher;if(!L||!PKG[k])return false;try{const r=await L.canOpenUrl({url:PKG[k]});if(!r||!r.value)return false;await L.openUrl({url:PKG[k]});return true}catch(e){return false}}
+function openApp(k){nativeOpen(k).then(ok=>{if(!ok)openWin(k)})}
+function openWin(k){
  const a=APPS[k];if(!a)return;
  if(a.u&&a.u.startsWith('tel:')){location.href=a.u;return}
  const P=phone.getBoundingClientRect(),W=Math.min(P.width*.88,440),H=a.n===2?Math.min(P.height*.66,600):Math.min(P.height*.5,520);
