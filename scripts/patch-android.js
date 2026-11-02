@@ -69,3 +69,23 @@ if (!g.includes('shizuku')) {
 }
 fs.writeFileSync(manifestPath, m);
 console.log('Launcher configurado: ' + appId);
+
+// assinatura fixa
+{
+  const gp2 = path.join(root, 'android/app/build.gradle');
+  let g = fs.readFileSync(gp2, 'utf8');
+  if (!g.includes('fixed-debug-sign')) {
+    g = g.replace(/android\s*\{/, `android {
+    // fixed-debug-sign
+    signingConfigs {
+        debug {
+            storeFile file('../../debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }`);
+    g = g.replace(/versionCode\s+\d+/, 'versionCode ' + (process.env.GITHUB_RUN_NUMBER || 1));
+    fs.writeFileSync(gp2, g);
+  }
+}
