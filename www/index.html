@@ -88,8 +88,17 @@ html,body{height:100%;background:#000;overflow:hidden;font-family:system-ui,-app
 .search.glass{overflow:hidden;border:2.2px solid rgba(255,255,255,.74);box-shadow:inset 0 3px 10px rgba(255,255,255,.75),inset 0 -8px 18px rgba(255,255,255,.2),0 8px 22px rgba(0,0,0,.25)}
 .search::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 28%,rgba(255,255,255,.32) 44%,transparent 58%);pointer-events:none}
 /* ===== abas na lateral: escondem e mostram os proprios icones ===== */
-.grid,.dock{transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .28s}
-.grid.gone,.dock.gone{transform:translateX(-125%);opacity:0;pointer-events:none}
+.grid,.dock,.all{transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .28s}
+.grid.gone,.dock.gone,.all.gone{transform:translateX(-125%);opacity:0;pointer-events:none}
+/* ===== todos os apps instalados (dentro da gaveta de cima) ===== */
+.all{position:absolute;left:4cqw;right:4cqw;top:calc(env(safe-area-inset-top,0px) + 77.6cqw + 40.8cqw*(var(--is,1) - 1));bottom:calc(env(safe-area-inset-bottom,0px) + 24.5cqw);display:flex;flex-direction:column;border-radius:6cqw;overflow:hidden;background:rgba(0,0,0,.2);backdrop-filter:blur(calc(var(--bl,10px)*1.4)) saturate(1.4);-webkit-backdrop-filter:blur(calc(var(--bl,10px)*1.4)) saturate(1.4);border:1.5px solid rgba(255,255,255,.4)}
+.ah{flex:none;padding:3cqw 4cqw 2cqw;font-size:max(12px,3.3cqw);font-weight:600;opacity:.9;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.ag{flex:1;min-height:0;overflow-y:auto;touch-action:pan-y;scrollbar-width:none;padding:1cqw 3cqw 4cqw;display:grid;grid-template-columns:repeat(4,1fr);gap:3.4cqw 1.6cqw;align-content:start}
+.ag::-webkit-scrollbar{display:none}
+.ai{display:flex;flex-direction:column;align-items:center;gap:1.1cqw;min-width:0}
+.ai .ic{width:calc(15cqw*var(--is,1))}
+.ai .ic img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.ai span{max-width:100%;font-size:max(10px,2.8cqw);line-height:1.15;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none}
 .drh{position:absolute;left:0;width:max(14px,4cqw);height:13cqw;z-index:6;border-radius:0 3cqw 3cqw 0;display:grid;place-items:center;cursor:pointer;color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.16));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.8px solid rgba(255,255,255,.7);border-left:0;box-shadow:inset 0 2px 5px rgba(255,255,255,.8),0 4px 12px rgba(0,0,0,.25)}
 .drh svg{width:max(10px,2.6cqw);height:max(10px,2.6cqw);transition:transform .25s}
 .drh.on svg{transform:rotate(180deg)}
@@ -193,6 +202,7 @@ html,body{font-family:var(--ff,system-ui,-apple-system,"Segoe UI",Roboto,sans-se
 
 <div class="search glass"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M16 16l5 5"/></svg>Search</div>
 <div class="grid" id="grid"></div>
+<div class="all" id="all"><div class="ah">Todos os apps</div><div class="ag"></div></div>
 <div class="dock glass" id="dock"></div>
 <div class="home"></div>
 <svg class="ptr" id="ptr" viewBox="0 0 24 28"><path d="M2 2v21l5.5-5 3.6 8 3.6-1.6-3.6-7.6h7.6z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -528,12 +538,35 @@ document.addEventListener('pointerup',e=>{const t=e.target.closest&&e.target.clo
 setInterval(()=>{if(!kbT)return;const a=document.activeElement;if(!kbT.isConnected||(a&&a.tagName==='IFRAME'))hideKb()},200);
 
 /* ===== abas: apertar esconde os proprios icones dentro da lateral; apertar de novo eles saem ===== */
-const tabs={top:grid,bot:dock};
+const tabs={top:[grid,all],bot:[dock]};
 ['top','bot'].forEach(id=>{
  const h=document.createElement('div');h.className='drh '+id+' on';
  h.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
- h.onclick=()=>{const gone=tabs[id].classList.toggle('gone');h.classList.toggle('on',!gone);hideMenu()};
+ h.onclick=()=>{const gone=tabs[id][0].classList.toggle('gone');tabs[id].slice(1).forEach(e=>e.classList.toggle('gone',gone));h.classList.toggle('on',!gone);hideMenu()};
  phone.insertBefore(h,ptr)});
+
+/* ===== todos os apps instalados: vem do plugin nativo "Apps" (so existe dentro do APK) ===== */
+const allG=all.querySelector('.ag'),allH=all.querySelector('.ah');
+const CAP=window.Capacitor,NA=(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform())?(CAP.Plugins&&CAP.Plugins.Apps||CAP.registerPlugin('Apps')):null;
+let appsSig='',appsTm=0;
+function aTile(a){const w=document.createElement('div');w.className='ai';const d=document.createElement('div');d.className='ic glass';
+ const im=new Image();im.alt='';im.draggable=false;if(a.icon)im.src=a.icon;d.append(im);
+ d.onclick=()=>{buzz();NA.launch({pkg:a.pkg}).catch(()=>toast('Não consegui abrir '+a.name))};
+ const l=document.createElement('span');l.textContent=a.name;w.append(d,l);return w}
+async function loadApps(){
+ if(!NA){allH.textContent='Todos os apps · a lista aparece só dentro do APK';return}
+ try{const r=await NA.list(),apps=r.apps||[],sig=apps.map(a=>a.pkg).join('|');
+  if(sig!==appsSig){appsSig=sig;allG.replaceChildren(...apps.map(aTile))}
+  allH.textContent='Todos os apps · '+apps.length}
+ catch(e){allH.textContent='Não consegui listar os apps'}}
+loadApps();
+if(NA&&NA.addListener)NA.addListener('changed',()=>{clearTimeout(appsTm);appsTm=setTimeout(loadApps,700)});
+/* botao "voltar" do Android: fecha teclado, painel ou a janela de cima; na tela inicial nao faz nada */
+addEventListener('launcherback',()=>{
+ if(kb.classList.contains('on')){hideKb();return}
+ if(cc.classList.contains('on')){toggleCC(false);return}
+ let top=null;phone.querySelectorAll('.win').forEach(x=>{if(!top||+x.style.zIndex>+top.style.zIndex)top=x});
+ if(top)top.remove()});
 
 /* ===== central de controle (puxe a barra de cima para baixo, ou toque na barra com a flechinha) ===== */
 /* Um site nao pode ligar/desligar Wi-Fi, dados, Bluetooth nem mudar o brilho do sistema.
@@ -658,10 +691,7 @@ applyTheme();
 
 /* janelas */
 let z=10,n=0;
-const PKG={msg:'com.whatsapp',cal:'com.google.android.calendar',cam:'com.zhiliaoapp.musically',mus:'com.google.android.apps.youtube.music',pho:'com.google.android.apps.photos',mail:'com.google.android.gm',map:'com.google.android.apps.maps',chr:'com.google.android.googlequicksearchbox',yt:'com.google.android.youtube',tg:'org.telegram.messenger',spo:'com.spotify.music'};
-async function nativeOpen(k){const L=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AppLauncher;if(!L||!PKG[k])return false;try{const r=await L.canOpenUrl({url:PKG[k]});if(!r||!r.value)return false;await L.openUrl({url:PKG[k]});return true}catch(e){return false}}
-function openApp(k){nativeOpen(k).then(ok=>{if(!ok)openWin(k)})}
-function openWin(k){
+function openApp(k){
  const a=APPS[k];if(!a)return;
  if(a.u&&a.u.startsWith('tel:')){location.href=a.u;return}
  const P=phone.getBoundingClientRect(),W=Math.min(P.width*.88,440),H=a.n===2?Math.min(P.height*.66,600):Math.min(P.height*.5,520);

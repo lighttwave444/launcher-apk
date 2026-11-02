@@ -17,8 +17,8 @@ jobs:
           java-version: 17
       - run: npm install
       - run: npx cap add android
-      - name: Permitir abrir outros apps (Android 11+)
-        run: sed -i 's#</manifest>#<queries><intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent></queries></manifest>#' android/app/src/main/AndroidManifest.xml
+      - name: Configurar como launcher (HOME + lista de apps)
+        run: node scripts/patch-android.js
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android
