@@ -34,7 +34,7 @@ public class PointerService extends AccessibilityService {
         public void run() {
             dragging = true;
             sx = cx;
-            sy = cy; ShizukuInput.down(cx, cy);
+            sy = cy; ShizukuInput.down(cx, cy); dragStart(cx, cy);
             if (cursor != null) cursor.setAlpha(0.5f);
         }
     };
@@ -57,6 +57,64 @@ public class PointerService extends AccessibilityService {
 
     @Override
     public void onInterrupt() { }
+
+        static GestureDescription.StrokeDescription gStroke;
+    static float gx, gy, gtx, gty;
+    static boolean gOn, gBusy, gEnd;
+
+    static boolean dragStart(float x, float y) {
+        if (inst == null || android.os.Build.VERSION.SDK_INT < 26) return false;
+        gx = x; gy = y; gtx = x; gty = y;
+        gOn = true; gEnd = false;
+        Path p = new Path();
+        p.moveTo(x, y);
+        gStroke = new GestureDescription.StrokeDescription(p, 0, 30, true);
+        return dispatchG(gStroke);
+    }
+
+    static boolean dispatchG(GestureDescription.StrokeDescription st) {
+        gBusy = true;
+        boolean ok = inst.dispatchGesture(new GestureDescription.Builder().addStroke(st).build(),
+            new android.accessibilityservice.AccessibilityService.GestureResultCallback() {
+                @Override public void onCompleted(GestureDescription d) { gBusy = false; dragNext(); }
+                @Override public void onCancelled(GestureDescription d) { gBusy = false; gOn = false; gStroke = null; }
+            }, null);
+        if (!ok) { gBusy = false; gOn = false; gStroke = null; }
+        return ok;
+    }
+
+    static void dragNext() {
+        if (!gOn || gBusy || gStroke == null) return;
+        boolean last = gEnd;
+        double dist = Math.hypot(gtx - gx, gty - gy);
+        if (!last && dist < 1) return;
+        try {
+            Path p = new Path();
+            p.moveTo(gx, gy);
+            p.lineTo(gtx, gty);
+            long dur = Math.max(10, Math.min(60, (long) (dist / 5)));
+            GestureDescription.StrokeDescription st = gStroke.continueStroke(p, 0, dur, !last);
+            gx = gtx; gy = gty;
+            gStroke = st;
+            if (last) gOn = false;
+            dispatchG(st);
+        } catch (Throwable t) {
+            gOn = false; gStroke = null; gBusy = false;
+        }
+    }
+
+    static void dragMove(float x, float y) {
+        if (!gOn) return;
+        gtx = x; gty = y;
+        if (!gBusy) dragNext();
+    }
+
+    static boolean dragEnd(float x, float y) {
+        if (!gOn) return false;
+        gtx = x; gty = y; gEnd = true;
+        if (!gBusy) dragNext();
+        return true;
+    }
 
     static boolean tap(float x, float y) {
         if (inst == null) return false;
@@ -94,7 +152,7 @@ public class PointerService extends AccessibilityService {
         cx = Math.max(0, Math.min(sw - 1, cx + dx));
         cy = Math.max(0, Math.min(sh - 1, cy + dy));
         cLp.x = (int) cx;
-        cLp.y = (int) cy; ShizukuInput.move(cx, cy);
+        cLp.y = (int) cy; ShizukuInput.move(cx, cy); if (gOn) dragMove(cx, cy);
         wm.updateViewLayout(cursor, cLp);
     }
 
@@ -188,12 +246,12 @@ public class PointerService extends AccessibilityService {
                         break;
                     case MotionEvent.ACTION_UP:
                         h.removeCallbacks(longPress);
-                        if (dragging) { if (!ShizukuInput.up(cx, cy)) swipe(sx, sy, cx, cy); }
+                        if (dragging) { if (!ShizukuInput.up(cx, cy) && !dragEnd(cx, cy)) swipe(sx, sy, cx, cy); }
                         else if (!moved) { if (!ShizukuInput.click(cx, cy)) tap(cx, cy); }
                         dragging = false;
                         cursor.setAlpha(1f);
                         break;
-                    case MotionEvent.ACTION_CANCEL: ShizukuInput.up(cx, cy);
+                    case MotionEvent.ACTION_CANCEL: ShizukuInput.up(cx, cy); dragEnd(cx, cy);
                         h.removeCallbacks(longPress);
                         dragging = false;
                         cursor.setAlpha(1f);
