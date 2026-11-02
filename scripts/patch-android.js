@@ -99,3 +99,13 @@ console.log('Launcher configurado: ' + appId);
     fs.writeFileSync(gp3, g3);
   }
 }
+
+// copiar ShizukuInput
+{
+  const src = path.join(root, 'native/ShizukuInput.java');
+  const dst = path.join(root, 'android/app/src/main/java/com/meuapp/launcher/ShizukuInput.java');
+  if (fs.existsSync(src)) {
+    fs.mkdirSync(path.dirname(dst), { recursive: true });
+    fs.copyFileSync(src, dst);
+  }
+}
