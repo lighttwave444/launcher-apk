@@ -55,13 +55,13 @@ public class ShizukuInput {
     private static MotionEvent ev(int action, float x, float y, long t, int buttons) {
         MotionEvent.PointerProperties[] p = { new MotionEvent.PointerProperties() };
         p[0].id = 0;
-        p[0].toolType = MotionEvent.TOOL_TYPE_MOUSE;
+        p[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent.PointerCoords[] c = { new MotionEvent.PointerCoords() };
         c[0].x = x;
         c[0].y = y;
         c[0].pressure = buttons != 0 ? 1f : 0f;
         c[0].size = 1f;
-        return MotionEvent.obtain(downTime, t, action, 1, p, c, 0, buttons, 1f, 1f, 0, 0, InputDevice.SOURCE_MOUSE, 0);
+        return MotionEvent.obtain(downTime, t, action, 1, p, c, 0, 0, 1f, 1f, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
     }
 
     private static void send(final MotionEvent e, long delay) {
@@ -91,7 +91,7 @@ public class ShizukuInput {
         if (!init()) return;
         long t = SystemClock.uptimeMillis();
         if (active) send(ev(MotionEvent.ACTION_MOVE, x, y, t, MotionEvent.BUTTON_PRIMARY), 0);
-        else send(ev(MotionEvent.ACTION_HOVER_MOVE, x, y, t, 0), 0);
+        
     }
 
     public static boolean up(float x, float y) {
